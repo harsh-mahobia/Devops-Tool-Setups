@@ -1,7 +1,7 @@
 
-# Ansible problem statement 1 : 
+# Ansible Scenario 1 : 
 
-```You are introducing Ansible into your infrastructure for automation. Install Ansible on a control node and create an inventory file listing managed hosts. Run an ad-hoc command to install Apache on all hosts and verify the status using Ansible’s -m service module```
+> **You are introducing Ansible into your infrastructure for automation. Install Ansible on a control node and create an inventory file listing managed hosts. Run an ad-hoc command to install Apache on all hosts and verify the status using Ansible’s -m service module.**
 
 ## **GOAL**
 
