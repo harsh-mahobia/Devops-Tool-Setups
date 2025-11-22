@@ -1,6 +1,6 @@
 # Ansible Scenario 2 : 
 
-_This would be nice if you had already performed [Ansible Scenario 1](https://github.com/harsh-mahobia/Devops-Tool-Setups/blob/main/ansible-senario-1.md)_
+_This would be nice if you had already performed [Ansible Scenario 1](https://github.com/harsh-mahobia/Devops-Tool-Setups/blob/main/ansible-scenario-1.md)_
 
 > Demonstrate how Ansible simplifies system administration by automating software installation, service management, and conflict resolution across remote servers. Set up an Ansible Controller on an AWS EC2 instance and manage another EC2 instance as the target node through SSH. Create an idempotent YAML playbook that completely removes Apache (if installed and blocking port 80), cleans up leftover processes, installs nginx, and ensures the nginx service is running and enabled at boot.
 
