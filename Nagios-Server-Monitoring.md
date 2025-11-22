@@ -45,6 +45,11 @@ sudo make install-config
 sudo make install-webconf
 ```
 
+* Download Plugins
+```
+  sudo apt install -y nagios-plugins nagios-nrpe-plugin
+```
+
 * Set admin password:
 ```
 sudo htpasswd -c /usr/local/nagios/etc/htpasswd.users nagiosadmin
