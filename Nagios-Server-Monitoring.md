@@ -49,11 +49,24 @@ sudo make install-webconf
 ```
   sudo apt install -y nagios-plugins nagios-nrpe-plugin
 ```
-
+* Create the check_nrpe command definition
+Create this file:
+```
+sudo nano /usr/local/nagios/etc/objects/commands.cfg
+```
+> Add this block (if it doesn’t already exist):
+```
+define command {
+    command_name    check_nrpe
+    command_line    /usr/lib/nagios/plugins/check_nrpe -H $HOSTADDRESS$ -c $ARG1$
+}
+```
 * Set admin password:
 ```
 sudo htpasswd -c /usr/local/nagios/etc/htpasswd.users nagiosadmin
 ```
+
+
 
 * NOW check this directory:
 ``` ls /usr/local/nagios ```
