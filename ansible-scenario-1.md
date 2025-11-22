@@ -39,6 +39,10 @@ Use the same key pair for all EC2 instances.
 # **STEP 2 — SSH into Control Node & Install Ansible**
 
 SSH into the control node:
+```
+nano mykey.pem
+```
+> copy and paste the content from downloaded .pem file
 
 ```bash
 ssh -i mykey.pem ubuntu@<CONTROL_NODE_PUBLIC_IP>
