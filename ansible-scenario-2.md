@@ -33,10 +33,15 @@ You create **two Ubuntu 22.04 EC2 instances**:
 # **2. Install Ansible on Controller**
 
 SSH into controller:
+```
+nano key.pem
+```
+> copy and paste the content from downloaded .pem file
 
 ```bash
 ssh -i key.pem ubuntu@<controller-public-ip>
 ```
+
 
 Install Ansible:
 
