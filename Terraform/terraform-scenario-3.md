@@ -1,10 +1,102 @@
-# **Scenario Description**
 
-*Your project requires reusable infrastructure templates. Create a Terraform module for a web server setup and use it in multiple environments (dev and prod) by managing workspaces. Show how Terraform state files differ between these environments and implement basic security best practices like variable files for credentials.*
+# Scenario Description
+
+Your project requires reusable infrastructure templates. Create a Terraform module for a web server setup and use it in multiple environments (dev and prod) by managing workspaces. Show how Terraform state files differ between these environments and implement basic security best practices like variable files for credentials.
 
 ---
 
-# **1. Folder Structure (Minimal)**
+# 1. Install Terraform (Windows and Ubuntu)
+
+## Windows (PowerShell)
+
+```powershell
+choco install terraform -y
+```
+
+> Installs Terraform using Chocolatey.
+
+```powershell
+terraform -v
+```
+
+> Verifies Terraform installation.
+
+## Ubuntu
+
+```bash
+sudo apt-get update && sudo apt-get install -y gnupg software-properties-common
+```
+
+> Installs required packages.
+
+```bash
+wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp.gpg
+```
+
+> Downloads and configures HashiCorp GPG key.
+
+```bash
+echo "deb [signed-by=/usr/share/keyrings/hashicorp.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+```
+
+> Adds Terraform repository.
+
+```bash
+sudo apt update
+sudo apt install terraform
+terraform -v
+```
+
+> Installs and verifies Terraform.
+
+---
+
+# 2. Install AWS CLI (Windows and Ubuntu)
+
+## Windows
+
+```powershell
+choco install awscli -y
+```
+
+> Installs AWS CLI.
+
+```powershell
+aws --version
+```
+
+> Confirms the installation.
+
+## Ubuntu
+
+```bash
+sudo apt install awscli -y
+aws --version
+```
+
+> Installs and verifies AWS CLI.
+
+---
+
+# 3. Configure AWS Credentials
+
+```bash
+aws configure
+```
+
+> Stores access key, secret key, region, and output format.
+
+Credentials saved at:
+
+```
+~/.aws/credentials
+```
+
+> Used automatically by Terraform.
+
+---
+
+# 4. Folder Structure (Minimal and Clean)
 
 ```
 terraform/
@@ -18,9 +110,9 @@ terraform/
 
 ---
 
-# **2. Terraform Module (Simple Web Server)**
+# 5. Terraform Module
 
-**modules/web/main.tf**
+### modules/web/main.tf
 
 ```hcl
 resource "aws_instance" "web" {
@@ -39,9 +131,9 @@ variable "env" {}
 
 ---
 
-# **3. Root Configuration**
+# 6. Root Terraform Configuration
 
-**main.tf**
+### main.tf
 
 ```hcl
 provider "aws" {
@@ -64,15 +156,15 @@ variable "instance_type" {}
 
 ---
 
-# **4. Environment Variable Files**
+# 7. Environment Variable Files
 
-**dev.tfvars**
+### dev.tfvars
 
 ```hcl
 instance_type = "t2.micro"
 ```
 
-**prod.tfvars**
+### prod.tfvars
 
 ```hcl
 instance_type = "t3.medium"
@@ -80,82 +172,115 @@ instance_type = "t3.medium"
 
 ---
 
-# **5. Initialize Terraform**
+# 8. Initialize Terraform
 
 ```bash
 terraform init
 ```
 
-> Downloads required providers and prepares Terraform to run.
+> Downloads AWS provider and prepares the working directory.
 
 ---
 
-# **6. Create Workspaces**
+# 9. Create Workspaces
 
 ```bash
 terraform workspace new dev
 ```
 
-> Creates an isolated environment for dev with its own state file.
+> Creates isolated dev environment.
 
 ```bash
 terraform workspace new prod
 ```
 
-> Creates a separate environment for production infrastructure.
+> Creates isolated prod environment.
 
 ---
 
-# **7. Select Workspace**
+# 10. Select Workspace
 
 ```bash
 terraform workspace select dev
 ```
 
-> Switches Terraform’s active environment to dev.
+> Switches the working environment to dev.
 
 ---
 
-# **8. Apply Dev Environment**
+# 11. Apply Dev Environment
 
 ```bash
 terraform apply -var-file=dev.tfvars
 ```
 
-> Deploys EC2 instance for dev using t2.micro instance type.
+> Deploys the dev EC2 instance using module and dev variables.
+
+Type:
+
+```
+yes
+```
+
+> Confirms the deployment.
 
 ---
 
-# **9. Switch to Prod**
+# 12. Switch to Prod
 
 ```bash
 terraform workspace select prod
 ```
 
-> Changes active environment to production.
+> Activates production environment.
 
 ---
 
-# **10. Apply Prod Environment**
+# 13. Apply Prod Environment
 
 ```bash
 terraform apply -var-file=prod.tfvars
 ```
 
-> Deploys production instance (t3.medium) with separate state.
+> Deploys production EC2 instance with its own configuration.
+
+Type:
+
+```
+yes
+```
+
+> Confirms the deployment.
 
 ---
 
-# **11. State File Separation**
+# 14. State File Separation
 
-Terraform automatically stores state as:
+Terraform automatically creates workspace-specific state:
 
 ```
 terraform.tfstate.d/dev/terraform.tfstate
 terraform.tfstate.d/prod/terraform.tfstate
 ```
 
-> Ensures dev and prod resources never interfere.
+> Keeps dev and prod resources completely isolated.
+
+---
+
+# 15. Destroy Resources When Needed
+
+```bash
+terraform destroy -var-file=dev.tfvars
+```
+
+> Deletes resources in the dev workspace.
+
+```bash
+terraform workspace select prod
+terraform destroy -var-file=prod.tfvars
+```
+
+> Deletes production resources safely.
 
 ---
 
