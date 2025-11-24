@@ -1,7 +1,7 @@
 
 # Scenario Description
 
-You need to manage multiple resources with dependencies. Create a Terraform configuration that deploys a web server and a security group, ensuring the server only launches after the security group is created. Demonstrate dependency management by reviewing the Terraform plan and output.
+You are tasked with automating cloud resource creation. Install Terraform on your system, configure it to use AWS, and write a Terraform configuration file that provisions a single virtual machine instance. Use Terraform CLI commands to initialize, apply, and destroy infrastructure.
 
 ---
 
@@ -13,7 +13,7 @@ You need to manage multiple resources with dependencies. Create a Terraform conf
 choco install terraform -y
 ```
 
-> Installs Terraform using Chocolatey.
+> Installs Terraform.
 
 ```powershell
 terraform -v
@@ -27,19 +27,19 @@ terraform -v
 sudo apt-get update && sudo apt-get install -y gnupg software-properties-common
 ```
 
-> Installs required packages.
+> Installs required dependencies.
 
 ```bash
 wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp.gpg
 ```
 
-> Downloads and configures HashiCorp GPG key.
+> Downloads HashiCorp GPG key.
 
 ```bash
 echo "deb [signed-by=/usr/share/keyrings/hashicorp.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
 ```
 
-> Adds Terraform repository.
+> Adds Terraform repository to system.
 
 ```bash
 sudo apt update
@@ -47,7 +47,7 @@ sudo apt install terraform
 terraform -v
 ```
 
-> Installs and verifies Terraform.
+> Installs Terraform and verifies installation.
 
 ---
 
@@ -65,7 +65,7 @@ choco install awscli -y
 aws --version
 ```
 
-> Confirms installation.
+> Confirms the CLI installation.
 
 ## Ubuntu
 
@@ -74,7 +74,7 @@ sudo apt install awscli -y
 aws --version
 ```
 
-> Installs and verifies AWS CLI.
+> Installs AWS CLI and verifies it.
 
 ---
 
@@ -84,7 +84,7 @@ aws --version
 aws configure
 ```
 
-> Saves access key, secret key, region, and output format for Terraform to use.
+> Saves AWS access key, secret key, region, and output format.
 
 Credentials stored at:
 
@@ -92,14 +92,14 @@ Credentials stored at:
 ~/.aws/credentials
 ```
 
-> Automatically used by Terraform.
+> Used automatically by Terraform.
 
 ---
 
 # 4. Folder Structure
 
 ```
-terraform/
+terraform-vm/
 │── main.tf
 │── variables.tf
 │── outputs.tf
@@ -109,7 +109,7 @@ terraform/
 
 # 5. Terraform Configuration
 
-### main.tf
+## main.tf
 
 ```hcl
 terraform {
@@ -125,40 +125,19 @@ provider "aws" {
   region = var.region
 }
 
-resource "aws_security_group" "web_sg" {
-  name        = "web-sg"
-  description = "Allow HTTP"
-
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-}
-
-resource "aws_instance" "web_server" {
+resource "aws_instance" "vm" {
   ami           = var.ami_id
   instance_type = var.instance_type
 
-  vpc_security_group_ids = [aws_security_group.web_sg.id]
-
   tags = {
-    Name = "Web-Server"
+    Name = "Single-VM-Demo"
   }
 }
 ```
 
 ---
 
-### variables.tf
+## variables.tf
 
 ```hcl
 variable "region" {
@@ -176,15 +155,15 @@ variable "instance_type" {
 
 ---
 
-### outputs.tf
+## outputs.tf
 
 ```hcl
-output "public_ip" {
-  value = aws_instance.web_server.public_ip
+output "instance_id" {
+  value = aws_instance.vm.id
 }
 
-output "sg_id" {
-  value = aws_security_group.web_sg.id
+output "public_ip" {
+  value = aws_instance.vm.public_ip
 }
 ```
 
@@ -196,7 +175,7 @@ output "sg_id" {
 terraform init
 ```
 
-> Downloads AWS provider and prepares Terraform workspace.
+> Downloads AWS provider and prepares Terraform working directory.
 
 ---
 
@@ -206,27 +185,27 @@ terraform init
 terraform validate
 ```
 
-> Checks that the configuration syntax is correct.
+> Checks for syntax errors and structural issues.
 
 ---
 
-# 8. Review Dependency Plan
+# 8. Preview Execution
 
 ```bash
 terraform plan
 ```
 
-> Shows creation order: security group first, EC2 instance second.
+> Shows what Terraform will create and verifies configuration is correct.
 
 ---
 
-# 9. Apply Infrastructure
+# 9. Apply Configuration
 
 ```bash
 terraform apply
 ```
 
-> Creates both resources, enforcing dependency based on reference.
+> Creates the virtual machine on AWS.
 
 Type:
 
@@ -234,7 +213,7 @@ Type:
 yes
 ```
 
-> Confirms creation.
+> Confirms resource creation.
 
 ---
 
@@ -243,11 +222,11 @@ yes
 After apply:
 
 ```
-public_ip = <EC2 Public IP>
-sg_id     = <Security Group ID>
+instance_id = <EC2_ID>
+public_ip   = <PUBLIC_IP>
 ```
 
-> Displays important details of created resources.
+> Displays essential details of the created VM.
 
 ---
 
@@ -257,7 +236,7 @@ sg_id     = <Security Group ID>
 terraform destroy
 ```
 
-> Removes EC2 instance first, then the security group.
+> Deletes the virtual machine from AWS.
 
 Type:
 
@@ -265,10 +244,9 @@ Type:
 yes
 ```
 
-> Confirms destruction.
+> Confirms deletion.
 
 ---
-
 # Thank you
 
 > Keep Exploring, Keep Automating 🚀
