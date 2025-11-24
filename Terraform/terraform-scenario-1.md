@@ -1,10 +1,102 @@
+
 # Scenario Description
 
 You need to manage multiple resources with dependencies. Create a Terraform configuration that deploys a web server and a security group, ensuring the server only launches after the security group is created. Demonstrate dependency management by reviewing the Terraform plan and output.
 
 ---
 
-# 1. Folder Structure
+# 1. Install Terraform (Windows and Ubuntu)
+
+## Windows (PowerShell)
+
+```powershell
+choco install terraform -y
+```
+
+> Installs Terraform using Chocolatey.
+
+```powershell
+terraform -v
+```
+
+> Verifies Terraform installation.
+
+## Ubuntu
+
+```bash
+sudo apt-get update && sudo apt-get install -y gnupg software-properties-common
+```
+
+> Installs required packages.
+
+```bash
+wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp.gpg
+```
+
+> Downloads and configures HashiCorp GPG key.
+
+```bash
+echo "deb [signed-by=/usr/share/keyrings/hashicorp.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+```
+
+> Adds Terraform repository.
+
+```bash
+sudo apt update
+sudo apt install terraform
+terraform -v
+```
+
+> Installs and verifies Terraform.
+
+---
+
+# 2. Install AWS CLI (Windows and Ubuntu)
+
+## Windows
+
+```powershell
+choco install awscli -y
+```
+
+> Installs AWS CLI.
+
+```powershell
+aws --version
+```
+
+> Confirms installation.
+
+## Ubuntu
+
+```bash
+sudo apt install awscli -y
+aws --version
+```
+
+> Installs and verifies AWS CLI.
+
+---
+
+# 3. Configure AWS Credentials
+
+```bash
+aws configure
+```
+
+> Saves access key, secret key, region, and output format for Terraform to use.
+
+Credentials stored at:
+
+```
+~/.aws/credentials
+```
+
+> Automatically used by Terraform.
+
+---
+
+# 4. Folder Structure
 
 ```
 terraform/
@@ -15,7 +107,7 @@ terraform/
 
 ---
 
-# 2. Terraform Configuration (Security Group + EC2)
+# 5. Terraform Configuration
 
 ### main.tf
 
@@ -98,43 +190,43 @@ output "sg_id" {
 
 ---
 
-# 3. Initialize Terraform
+# 6. Initialize Terraform
 
 ```bash
 terraform init
 ```
 
-> Downloads required providers and prepares Terraform to run.
+> Downloads AWS provider and prepares Terraform workspace.
 
 ---
 
-# 4. Validate Configuration
+# 7. Validate Configuration
 
 ```bash
 terraform validate
 ```
 
-> Checks Terraform syntax and structure.
+> Checks that the configuration syntax is correct.
 
 ---
 
-# 5. Review Dependency Plan
+# 8. Review Dependency Plan
 
 ```bash
 terraform plan
 ```
 
-> Shows that the security group is created before the EC2 instance because of implicit dependency.
+> Shows creation order: security group first, EC2 instance second.
 
 ---
 
-# 6. Apply Infrastructure
+# 9. Apply Infrastructure
 
 ```bash
 terraform apply
 ```
 
-> Creates the security group first, then the EC2 instance.
+> Creates both resources, enforcing dependency based on reference.
 
 Type:
 
@@ -142,30 +234,30 @@ Type:
 yes
 ```
 
-> Confirms the creation process.
+> Confirms creation.
 
 ---
 
-# 7. View Outputs
+# 10. View Outputs
 
 After apply:
 
 ```
-public_ip = <public_ip_here>
-sg_id     = <security_group_id_here>
+public_ip = <EC2 Public IP>
+sg_id     = <Security Group ID>
 ```
 
-> Displays the important resource values.
+> Displays important details of created resources.
 
 ---
 
-# 8. Destroy Infrastructure
+# 11. Destroy Infrastructure
 
 ```bash
 terraform destroy
 ```
 
-> Deletes EC2 instance first, then deletes the security group.
+> Removes EC2 instance first, then the security group.
 
 Type:
 
@@ -173,7 +265,7 @@ Type:
 yes
 ```
 
-> Confirms the destruction process.
+> Confirms destruction.
 
 ---
 
