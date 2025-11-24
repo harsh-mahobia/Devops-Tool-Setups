@@ -1,90 +1,13 @@
-# **Scenario Description**
+# Scenario Description
 
-> *You are tasked with automating cloud resource creation. Install Terraform on your system, configure it to use AWS, and write a Terraform configuration file that provisions a single virtual machine instance. Use Terraform CLI commands to initialize, apply, and destroy infrastructure.*
-
----
-
-# **1. Install Terraform (Windows + Ubuntu)**
-
-## **Windows**
-
-### **Using Chocolatey**
-
-```powershell
-choco install terraform -y
-```
-
-### **Verify**
-
-```powershell
-terraform -v
-```
+You need to manage multiple resources with dependencies. Create a Terraform configuration that deploys a web server and a security group, ensuring the server only launches after the security group is created. Demonstrate dependency management by reviewing the Terraform plan and output.
 
 ---
 
-## **Ubuntu**
-
-```bash
-sudo apt-get update && sudo apt-get install -y gnupg software-properties-common
-wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp.gpg
-echo "deb [signed-by=/usr/share/keyrings/hashicorp.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
-sudo apt update
-sudo apt install terraform
-terraform -v
-```
-
----
-
-# **2. Install & Configure AWS CLI (Windows + Ubuntu)**
-
-## **Windows**
-
-```powershell
-choco install awscli -y
-```
-
-Verify it works:
-
-```powershell
-aws --version
-```
-
----
-
-## **Ubuntu**
-
-```bash
-sudo apt install awscli -y
-aws --version
-```
-
----
-
-## **Configure AWS Credentials**
-
-```bash
-aws configure
-```
-
-Enter:
-
-* AWS Access Key
-* AWS Secret Key
-* Region: `ap-south-1`
-* Output: `json`
-
-Credentials saved in:
+# 1. Folder Structure
 
 ```
-~/.aws/credentials
-```
-
----
-
-# **3. Create Terraform Project Structure**
-
-```
-aws-terraform-demo/
+terraform/
 │── main.tf
 │── variables.tf
 │── outputs.tf
@@ -92,9 +15,9 @@ aws-terraform-demo/
 
 ---
 
-# **4. Terraform Configuration (Provision EC2 Instance)**
+# 2. Terraform Configuration (Security Group + EC2)
 
-### **main.tf**
+### main.tf
 
 ```hcl
 terraform {
@@ -110,19 +33,40 @@ provider "aws" {
   region = var.region
 }
 
-resource "aws_instance" "my_vm" {
+resource "aws_security_group" "web_sg" {
+  name        = "web-sg"
+  description = "Allow HTTP"
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource "aws_instance" "web_server" {
   ami           = var.ami_id
   instance_type = var.instance_type
 
+  vpc_security_group_ids = [aws_security_group.web_sg.id]
+
   tags = {
-    Name = "Terraform-EC2-Demo"
+    Name = "Web-Server"
   }
 }
 ```
 
 ---
 
-### **variables.tf**
+### variables.tf
 
 ```hcl
 variable "region" {
@@ -140,63 +84,96 @@ variable "instance_type" {
 
 ---
 
-### **outputs.tf**
+### outputs.tf
 
 ```hcl
 output "public_ip" {
-  value = aws_instance.my_vm.public_ip
+  value = aws_instance.web_server.public_ip
 }
 
-output "instance_id" {
-  value = aws_instance.my_vm.id
+output "sg_id" {
+  value = aws_security_group.web_sg.id
 }
 ```
 
 ---
 
-# **5. Run Terraform Commands (Windows PowerShell or Ubuntu)**
-
-### **Initialize**
+# 3. Initialize Terraform
 
 ```bash
 terraform init
 ```
 
-### **Validate**
+> Downloads required providers and prepares Terraform to run.
+
+---
+
+# 4. Validate Configuration
 
 ```bash
 terraform validate
 ```
 
-### **Plan**
+> Checks Terraform syntax and structure.
+
+---
+
+# 5. Review Dependency Plan
 
 ```bash
 terraform plan
 ```
 
-### **Apply**
+> Shows that the security group is created before the EC2 instance because of implicit dependency.
+
+---
+
+# 6. Apply Infrastructure
 
 ```bash
 terraform apply
 ```
 
-Confirm:
+> Creates the security group first, then the EC2 instance.
+
+Type:
 
 ```
 yes
 ```
 
-### **Destroy**
+> Confirms the creation process.
+
+---
+
+# 7. View Outputs
+
+After apply:
+
+```
+public_ip = <public_ip_here>
+sg_id     = <security_group_id_here>
+```
+
+> Displays the important resource values.
+
+---
+
+# 8. Destroy Infrastructure
 
 ```bash
 terraform destroy
 ```
 
-Confirm:
+> Deletes EC2 instance first, then deletes the security group.
+
+Type:
 
 ```
 yes
 ```
+
+> Confirms the destruction process.
 
 ---
 
